@@ -1,0 +1,30 @@
+# This repo holds ONLY curated, shareable config.
+# It is copied INTO ~/.claude — it is never ~/.claude itself.
+# The entries below are a safety net in case anyone ever runs `git init`
+# inside a real ~/.claude and points it here by mistake.
+
+# Secrets — never commit
+.credentials.json
+*.pem
+*.key
+.env
+.env.*
+
+# Runtime state / personal data
+history.jsonl
+daemon.log
+.last-cleanup
+settings.local.json
+mcp-needs-auth-cache.json
+projects/
+sessions/
+session-env/
+shell-snapshots/
+file-history/
+cache/
+daemon/
+jobs/
+downloads/
+backups/
+plugins/
+memory/
