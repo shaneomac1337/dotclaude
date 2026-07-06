@@ -17,7 +17,7 @@ Windows / PowerShell 7+ focused, but the Markdown and JS pieces are cross-platfo
 | `hooks/skill-forced-eval-hook.ps1` | `UserPromptSubmit` hook that injects a "SKILL CHECK" so the model actually *activates* a matching skill instead of just thinking about it. |
 | `settings.json` | Wires up the statusline, the hook, and the claude-mem plugin. Paths use a `__HOME__` placeholder that `install.ps1` resolves per-machine. |
 | `agents/` | A model-tiered subagent fleet: `Explore` (Haiku, cheap read-only search), `implementer` (Sonnet), `planner` (Opus, xhigh), `code-reviewer` (Opus, high). |
-| `workflows/dev-pipeline.js` | A `Workflow` script: Haiku explores → Opus plans → Sonnet implements → Opus reviews. |
+| `skills/dev-pipeline/` | My own skill: a tiered **Explore → Plan → Implement → Review** pipeline (Haiku → Opus → Sonnet → Opus) that runs either as a **dynamic** background `Workflow` (`pipeline.js`) or **inline** in-session via subagents. Optionally grills you first to sharpen the task. |
 
 ## Install
 
