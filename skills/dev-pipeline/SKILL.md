@@ -34,7 +34,7 @@ When grilling concludes, **distill the outcome into a sharpened task brief** —
 
 Call the `Workflow` tool with:
 
-- `scriptPath`: the `pipeline.js` file **in this skill's own directory** (alongside this SKILL.md). On this machine that resolves to `__HOME__\.claude\skills\dev-pipeline\pipeline.js`.
+- `scriptPath`: the `pipeline.js` file **in this skill's own directory** (alongside this SKILL.md) — i.e. `~/.claude/skills/dev-pipeline/pipeline.js` (`%USERPROFILE%\.claude\skills\dev-pipeline\pipeline.js` on Windows). Resolve it to an absolute path for the current machine.
 - `args`: `{ task: "<the resolved task>" }`
 
 The workflow returns a summary with the task count and any items flagged `changes-needed`. Relay that back to the user — don't dump raw agent transcripts. If items need changes, offer to address them (either another dynamic pass or inline fixes).

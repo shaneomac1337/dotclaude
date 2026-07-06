@@ -58,14 +58,6 @@ foreach ($rel in $files) {
   }
 }
 
-# dev-pipeline SKILL.md: resolve the __HOME__ placeholder in the installed copy.
-$skillDst = Join-Path $claudeDir 'skills/dev-pipeline/SKILL.md'
-if (-not $DryRun -and (Test-Path $skillDst)) {
-  ((Get-Content $skillDst -Raw) -replace '__HOME__', ($HOME -replace '/', '\')) |
-    Set-Content -Path $skillDst -Encoding utf8
-  Say "  resolved __HOME__ in skills/dev-pipeline/SKILL.md"
-}
-
 # settings.json: resolve the __HOME__ placeholder, then merge-or-write.
 $settingsDst = Join-Path $claudeDir 'settings.json'
 $rendered    = (Get-Content (Join-Path $repo 'settings.json') -Raw) -replace '__HOME__', $homeFwd
