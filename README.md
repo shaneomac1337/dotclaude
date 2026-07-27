@@ -80,10 +80,25 @@ own homes). Install them separately:
   ```
   claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest
   ```
-- **Matt Pocock's engineering skills** — most of my `skills/` folder is his published bundle
-  (`grill-*`, `writing-*`, `to-prd`, `triage`, `domain-modeling`, `codebase-design`, `teach`,
-  `edit-article`, …). Install from the source rather than copying mine. See
-  [Matt Pocock's skills](https://github.com/mattpocock) / the AI Hero project.
+- **[Matt Pocock's engineering skills](https://github.com/mattpocock/skills)** (MIT) — now an
+  installable plugin, so don't copy the files by hand:
+  ```
+  claude plugin marketplace add mattpocock/skills
+  claude plugin install mattpocock-skills@mattpocock
+  ```
+  22 skills — `grilling`, `grill-me`, `grill-with-docs`, `tdd`, `to-spec`, `to-tickets`,
+  `triage`, `domain-modeling`, `codebase-design`, `code-review`, `implement`, `research`,
+  `diagnosing-bugs`, `wayfinder`, `teach`, `handoff`, … The repo's `in-progress/`,
+  `personal/` (`edit-article`, `obsidian-vault`) and `deprecated/` folders are *not* in the
+  plugin; clone the repo if you want those.
+
+  **`dev-pipeline` depends on this** — its optional grill step calls `Skill(grilling)`, which
+  only exists once this plugin is installed.
+
+  Declaring the plugin in `settings.json` alone does **not** pull it down on a fresh machine
+  (tested — `extraKnownMarketplaces` + `enabledPlugins` did not materialize it). Run the two
+  commands above. That's why nothing plugin-related is vendored in this repo's
+  `settings.json`.
 - A few Anthropic-shipped example skills (`setup-pre-commit`, `git-guardrails-claude-code`,
   `resolving-merge-conflicts`) ship with Claude Code / its plugin marketplaces.
 
