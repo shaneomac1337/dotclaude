@@ -84,7 +84,6 @@ fi
 
 echo
 echo "Done. Next steps (not automated — see README):"
-echo "  1. Optional: claude-mem plugin   /plugin marketplace add thedotmack/claude-mem   then enable claude-mem"
-echo "  2. Optional: chrome-devtools MCP  claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
-echo "  3. Install Matt Pocock skills:    see README (they are not vendored here)"
-echo "  4. Restart Claude Code so settings + statusline take effect."
+echo "  1. Optional: chrome-devtools MCP  claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
+echo "  2. Install Matt Pocock skills:    see README (they are not vendored here)"
+echo "  3. Restart Claude Code so settings + statusline take effect."

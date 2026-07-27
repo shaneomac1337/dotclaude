@@ -23,7 +23,7 @@ $homeFwd   = ($HOME -replace '\\', '/')
 $files = @(
   'CLAUDE.md',
   'statusline.ps1',
-  'hooks/skill-forced-eval-hook.ps1',
+  'hooks/skill-forced-eval-hook.sh',
   'agents/Explore.md',
   'agents/code-reviewer.md',
   'agents/implementer.md',
@@ -61,11 +61,36 @@ foreach ($rel in $files) {
   }
 }
 
-# settings.json: resolve the command placeholders to pwsh invocations, then merge-or-write.
+# The hook runs through Git Bash even on Windows — there is deliberately no .ps1 twin,
+# so the injected payload can never drift between platforms. Resolve bash.exe by absolute
+# path: a bare `bash` on PATH usually hits WSL's System32 bash, which cannot read a
+# Windows-style path. The statusline stays PowerShell — it does real path work.
+$pf   = $env:ProgramFiles
+$pf86 = ${env:ProgramFiles(x86)}
+$bash = @(
+  $(if ($pf)   { Join-Path $pf   'Git/bin/bash.exe' })
+  $(if ($pf86) { Join-Path $pf86 'Git/bin/bash.exe' })
+) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+if (-not $bash) {
+  # Fall back to deriving it from wherever git.exe lives (…/Git/cmd/git.exe -> …/Git/bin/bash.exe).
+  $gitCmd = (Get-Command git -ErrorAction SilentlyContinue).Source
+  if ($gitCmd) {
+    $candidate = Join-Path (Split-Path (Split-Path $gitCmd -Parent) -Parent) 'bin/bash.exe'
+    if (Test-Path $candidate) { $bash = $candidate }
+  }
+}
+if (-not $bash) {
+  Say "  WARNING: Git Bash (bash.exe) not found — the skill-eval hook needs it."
+  Say "           Install Git for Windows, then fix hooks.UserPromptSubmit in settings.json by hand."
+  $bash = 'bash'
+}
+$bashFwd = ($bash -replace '\\', '/')
+
+# settings.json: resolve the command placeholders, then merge-or-write.
 $settingsDst = Join-Path $claudeDir 'settings.json'
 $rendered    = (Get-Content (Join-Path $repo 'settings.json') -Raw) `
   -replace '__STATUSLINE__',      "pwsh -NoProfile -File $homeFwd/.claude/statusline.ps1" `
-  -replace '__HOOK_SKILL_EVAL__', "pwsh -NoProfile -File $homeFwd/.claude/hooks/skill-forced-eval-hook.ps1"
+  -replace '__HOOK_SKILL_EVAL__', "\`"$bashFwd\`" \`"$homeFwd/.claude/hooks/skill-forced-eval-hook.sh\`""
 if (Test-Path $settingsDst) {
   Say "  NOTE: existing settings.json left in place. Review dotclaude's version and merge by hand:"
   Say "        repo:    $repo/settings.json  (with placeholders -> $homeFwd/.claude/...)"
@@ -80,7 +105,6 @@ if (Test-Path $settingsDst) {
 
 Say ""
 Say "Done. Next steps (not automated — see README):"
-Say "  1. Optional: claude-mem plugin:  /plugin marketplace add thedotmack/claude-mem  then enable claude-mem"
-Say "  2. Optional: chrome-devtools MCP: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
-Say "  3. Install Matt Pocock skills:   see README (they are not vendored here)"
-Say "  4. Restart Claude Code so settings + statusline take effect."
+Say "  1. Optional: chrome-devtools MCP: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
+Say "  2. Install Matt Pocock skills:   see README (they are not vendored here)"
+Say "  3. Restart Claude Code so settings + statusline take effect."
