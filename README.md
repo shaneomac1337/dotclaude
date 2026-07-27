@@ -16,7 +16,7 @@ to the matching pair. The Markdown and JS pieces are shared.
 |------|--------------|
 | `CLAUDE.md` | Global behavioral guidelines — think-before-coding, simplicity, surgical changes, goal-driven execution. Distilled from Andrej Karpathy's Jan 2026 notes on LLM coding pitfalls. |
 | `statusline.sh` / `statusline.ps1` | One-line statusline: `📁 dir · 🌿 branch · 🧠 model · 📊 context bar · 💰 cost · ⏱ duration`. The context bar is **1M-context-aware** (auto-detects `[1m]` model variants) and shifts green→yellow→red as it fills. |
-| `hooks/skill-forced-eval-hook.sh` / `.ps1` | `UserPromptSubmit` hook that injects a "SKILL CHECK" so the model actually *activates* a matching skill instead of just thinking about it. |
+| `hooks/skill-forced-eval-hook.sh` / `.ps1` | `UserPromptSubmit` hook that injects a mandatory skill-activation sequence — evaluate every available skill, then actually *call* `Skill()` instead of just thinking about it. Payload is verbatim from [spences10/svelte-claude-skills](https://github.com/spences10/svelte-claude-skills/blob/main/.claude/hooks/skill-forced-eval-hook.sh). |
 | `settings.json` | Wires up the statusline and the hook. The two commands are `__STATUSLINE__` / `__HOOK_SKILL_EVAL__` placeholders that each installer resolves to the right script for the platform. |
 | `agents/` | A model-tiered subagent fleet: `Explore` (Haiku, cheap read-only search), `implementer` (Sonnet), `planner` (Opus, xhigh), `code-reviewer` (Opus, high). |
 | `skills/dev-pipeline/` | My own skill: a tiered **Explore → Plan → Implement → Review** pipeline (Haiku → Opus → Sonnet → Opus) that runs either as a **dynamic** background `Workflow` (`pipeline.js`) or **inline** in-session via subagents. Optionally grills you first to sharpen the task. |

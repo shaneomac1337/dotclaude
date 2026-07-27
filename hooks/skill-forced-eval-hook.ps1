@@ -1,18 +1,35 @@
 # UserPromptSubmit hook: force skill ACTIVATION, not just evaluation.
-# Stdout is injected into the model's context for this turn. Fires on every prompt;
-# the model itself skips the ceremony on trivial/conversational turns (see Exception).
+# Stdout is injected into the model's context for this turn.
 # Wired in ~/.claude/settings.json under hooks.UserPromptSubmit.
 # PowerShell (not bash) on purpose: immune to Git Bash path mangling on Windows.
+# Windows twin of skill-forced-eval-hook.sh — keep the two payloads in sync.
+#
+# The payload below is verbatim from spences10/svelte-claude-skills:
+# https://github.com/spences10/svelte-claude-skills/blob/main/.claude/hooks/skill-forced-eval-hook.sh
 @'
-SKILL CHECK — do this before implementing or acting on a task request:
+INSTRUCTION: MANDATORY SKILL ACTIVATION SEQUENCE
 
-1. Consider the skills available to your Skill tool. Name ONLY the ones that match
-   this request — one line each: [skill] — why it applies. Do not roll-call the
-   others. If none match, say nothing about skills and proceed.
-2. For each matched skill, call Skill(name) NOW — before writing code or taking
-   action. Evaluation without the Skill() call accomplishes nothing.
-3. Implement only after the matched skills are loaded.
+Step 1 - EVALUATE (do this in your response):
+For each skill in <available_skills>, state: [skill-name] - YES/NO - [reason]
 
-Exception: skip this entirely on trivial or conversational turns (greetings,
-acknowledgements, one-line factual questions) — just answer directly.
+Step 2 - ACTIVATE (do this immediately after Step 1):
+IF any skills are YES → Use Skill(skill-name) tool for EACH relevant skill NOW
+IF no skills are YES → State "No skills needed" and proceed
+
+Step 3 - IMPLEMENT:
+Only after Step 2 is complete, proceed with implementation.
+
+CRITICAL: You MUST call Skill() tool in Step 2. Do NOT skip to implementation.
+The evaluation (Step 1) is WORTHLESS unless you ACTIVATE (Step 2) the skills.
+
+Example of correct sequence:
+- research: NO - not a research task
+- svelte5-runes: YES - need reactive state
+- sveltekit-structure: YES - creating routes
+
+[Then IMMEDIATELY use Skill() tool:]
+> Skill(svelte5-runes)
+> Skill(sveltekit-structure)
+
+[THEN and ONLY THEN start implementation]
 '@
