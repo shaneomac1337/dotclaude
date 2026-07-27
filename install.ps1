@@ -2,12 +2,15 @@
 <#
   Installs this Claude Code setup into ~/.claude.
   - Copies CLAUDE.md, statusline.ps1, hooks, agents, workflows verbatim.
-  - Writes settings.json with the __HOME__ placeholder resolved to your real home path.
+  - Writes settings.json with the __STATUSLINE__ / __HOOK_SKILL_EVAL__ placeholders
+    resolved to pwsh invocations of the .ps1 scripts in your real home path.
   - Backs up anything it would overwrite to ~/.claude/backups/dotclaude-<timestamp>/.
   - Never touches credentials, history, sessions, or memory.
 
   Usage:   pwsh -File ./install.ps1
            pwsh -File ./install.ps1 -DryRun     # show what would happen, change nothing
+
+  Linux/macOS counterpart: install.sh
 #>
 param([switch]$DryRun)
 
@@ -58,12 +61,14 @@ foreach ($rel in $files) {
   }
 }
 
-# settings.json: resolve the __HOME__ placeholder, then merge-or-write.
+# settings.json: resolve the command placeholders to pwsh invocations, then merge-or-write.
 $settingsDst = Join-Path $claudeDir 'settings.json'
-$rendered    = (Get-Content (Join-Path $repo 'settings.json') -Raw) -replace '__HOME__', $homeFwd
+$rendered    = (Get-Content (Join-Path $repo 'settings.json') -Raw) `
+  -replace '__STATUSLINE__',      "pwsh -NoProfile -File $homeFwd/.claude/statusline.ps1" `
+  -replace '__HOOK_SKILL_EVAL__', "pwsh -NoProfile -File $homeFwd/.claude/hooks/skill-forced-eval-hook.ps1"
 if (Test-Path $settingsDst) {
   Say "  NOTE: existing settings.json left in place. Review dotclaude's version and merge by hand:"
-  Say "        repo:    $repo/settings.json  (with __HOME__ -> $homeFwd)"
+  Say "        repo:    $repo/settings.json  (with placeholders -> $homeFwd/.claude/...)"
   Say "        current: $settingsDst"
   $preview = Join-Path $claudeDir 'settings.dotclaude.json'
   if (-not $DryRun) { Set-Content -Path $preview -Value $rendered -Encoding utf8 }
@@ -75,7 +80,7 @@ if (Test-Path $settingsDst) {
 
 Say ""
 Say "Done. Next steps (not automated — see README):"
-Say "  1. Install claude-mem plugin:   /plugin marketplace add thedotmack/claude-mem  then enable claude-mem"
-Say "  2. Add chrome-devtools MCP:      claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
+Say "  1. Optional: claude-mem plugin:  /plugin marketplace add thedotmack/claude-mem  then enable claude-mem"
+Say "  2. Optional: chrome-devtools MCP: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest"
 Say "  3. Install Matt Pocock skills:   see README (they are not vendored here)"
 Say "  4. Restart Claude Code so settings + statusline take effect."
