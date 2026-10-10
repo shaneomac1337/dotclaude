@@ -27,9 +27,11 @@ $data = $raw | ConvertFrom-Json
 
 # Detect the real context window from the active model. 1M-context variants carry
 # "[1m]" in their id (e.g. claude-opus-4-8[1m]) or "1M" in the display name.
+# Prefer the size Claude Code reports; the name match is only a fallback for older versions.
 $ContextLimit = $ContextLimitDefault
 $modelStr = "$($data.model.id) $($data.model.display_name)"
-if ($modelStr -match '\[1m\]|\b1m\b') { $ContextLimit = 1000000 }
+if ($data.context_window.context_window_size -gt 0) { $ContextLimit = [int]$data.context_window.context_window_size }
+elseif ($modelStr -match '\[1m\]|\b1m\b|fable') { $ContextLimit = 1000000 }
 
 $segments = @()
 

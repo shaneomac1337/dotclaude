@@ -25,23 +25,28 @@ raw="$(cat)"
 
 # Split on 0x1F (unit separator), not tab: tab is IFS-whitespace, so bash would
 # collapse consecutive tabs and shift every field left whenever one comes back empty.
-IFS=$'\x1f' read -r cwd model_name model_id transcript cost dur_ms < <(
+IFS=$'\x1f' read -r cwd model_name model_id transcript cost dur_ms ctx_size < <(
   printf '%s' "$raw" | jq -r '[
     (.workspace.current_dir // .cwd // ""),
     (.model.display_name // ""),
     (.model.id // ""),
     (.transcript_path // ""),
     (.cost.total_cost_usd // ""),
-    (.cost.total_duration_ms // "")
+    (.cost.total_duration_ms // ""),
+    (.context_window.context_window_size // "")
   ] | map(tostring) | join("\u001f")' 2>/dev/null
 )
+ctx_size="${ctx_size%$'\r'}"   # Windows jq ends the line with CRLF
 
 # Detect the real context window from the active model. 1M-context variants carry
 # "[1m]" in their id (e.g. claude-opus-4-8[1m]) or "1M" in the display name.
 context_limit=$CONTEXT_LIMIT_DEFAULT
 model_str="$model_id $model_name"
 shopt -s nocasematch
-if [[ "$model_str" == *"[1m]"* || "$model_str" =~ (^|[^a-z0-9])1m([^a-z0-9]|$) ]]; then
+# Prefer the size Claude Code reports; the name match is only a fallback for older versions.
+if [[ "$ctx_size" =~ ^[0-9]+$ && "$ctx_size" -gt 0 ]]; then
+  context_limit=$ctx_size
+elif [[ "$model_str" == *"[1m]"* || "$model_str" == *fable* || "$model_str" =~ (^|[^a-z0-9])1m([^a-z0-9]|$) ]]; then
   context_limit=1000000
 fi
 shopt -u nocasematch
